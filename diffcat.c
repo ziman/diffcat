@@ -3,6 +3,9 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define STDIN  0
 #define STDOUT 1
@@ -15,19 +18,28 @@ void die(const char * msg)
 	exit(1);
 }
 
-int main(void)
+int main(int argc, char * argv[])
 {
+	if (argc != 2)
+	{
+		printf("usage: zcat image.gz | ./diffcat /dev/mmcblk0\n");
+		exit(1);
+	}
+
+	int f_out = open(argv[1], O_CREAT | O_RDWR);
+	if (f_out < 0) die("open outfile");
+
 	char buf_in[BUFSIZE];
 	char buf_out[BUFSIZE];
 	off_t offset = 0;
 	ssize_t bytes_read;
 
-	while (bytes_read = read(STDIN, buf_in, BUFSIZE))
+	while (bytes_read = read(STDIN_FILENO, buf_in, BUFSIZE))
 	{
-		off_t ret_in = lseek(STDOUT, offset, SEEK_SET);
+		off_t ret_in = lseek(f_out, offset, SEEK_SET);
 		if (ret_in < 0) die("lseek in outfile");
 		
-		ssize_t ret_out = read(STDOUT, buf_out, bytes_read);
+		ssize_t ret_out = read(f_out, buf_out, bytes_read);
 		if (ret_out < 0) die("read from outfile");
 
 		if (memcmp(buf_in, buf_out, bytes_read))
@@ -36,10 +48,10 @@ int main(void)
 			fprintf(stderr, "overwriting at 0x%zx\n", offset);
 #endif
 			// outfile contains a different block, overwrite
-			ret_in = lseek(STDOUT, offset, SEEK_SET);
+			ret_in = lseek(f_out, offset, SEEK_SET);
 			if (ret_in < 0) die("lseek in outfile before write");
 
-			ssize_t bytes_written = write(STDOUT, buf_in, bytes_read);
+			ssize_t bytes_written = write(f_out, buf_in, bytes_read);
 			if (bytes_written != bytes_read) die("write to outfile");
 		}
 #ifdef DEBUG
