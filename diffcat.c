@@ -7,10 +7,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define STDIN  0
-#define STDOUT 1
-#define STDERR 2
+#ifndef BUFSIZE
 #define BUFSIZE 4096
+#endif
 
 void die(const char * msg)
 {
