@@ -1,5 +1,4 @@
-debug: diffcat.c Makefile
-	cc -O2 diffcat.c -o diffcat -DDEBUG
+all: diffcat
 
 diffcat: diffcat.c Makefile
 	cc -O2 diffcat.c -o diffcat
