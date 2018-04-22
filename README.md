@@ -13,6 +13,8 @@ On a ThinkPad laptop with a cheap SD card:
 * `pixz -d image.xz > /dev/mmcblk0`: 41 minutes
 * `pixz -d image.xz | diffcat /dev/mmcblk0`: 6 minutes
 
+(The diffcat call ran on an already identical image so it performed no writes.)
+
 ## Usage
 
 ```bash
